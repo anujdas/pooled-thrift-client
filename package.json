@@ -1,0 +1,24 @@
+{
+  "name": "pooled-thrift-client",
+  "version": "0.0.1",
+  "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anujdas/pooled-thrift-client.git"
+  },
+  "keywords": [
+    "thrift",
+    "client",
+    "pool"
+  ],
+  "author": "Anuj Das",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/anujdas/pooled-thrift-client/issues"
+  },
+  "homepage": "https://github.com/anujdas/pooled-thrift-client#readme"
+}
