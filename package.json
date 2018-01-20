@@ -1,6 +1,6 @@
 {
   "name": "pooled-thrift-client",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
   "main": "dist/index.js",
   "scripts": {
