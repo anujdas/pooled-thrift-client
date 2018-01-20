@@ -2,9 +2,11 @@
   "name": "pooled-thrift-client",
   "version": "0.0.1",
   "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "npm test"
+    "build": "babel src -d dist",
+    "lint": "eslint .",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/anujdas/pooled-thrift-client/issues"
   },
-  "homepage": "https://github.com/anujdas/pooled-thrift-client#readme"
+  "homepage": "https://github.com/anujdas/pooled-thrift-client#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.13.1",
+    "eslint-config-brigade": "^7.0.0"
+  }
 }
