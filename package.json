@@ -23,6 +23,10 @@
     "url": "https://github.com/anujdas/pooled-thrift-client/issues"
   },
   "homepage": "https://github.com/anujdas/pooled-thrift-client#readme",
+  "dependencies": {
+    "generic-pool": "^3.4.0",
+    "thrift": "^0.11.0"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-polyfill": "^6.26.0",
