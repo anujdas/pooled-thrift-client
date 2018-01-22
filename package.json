@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anujdas/pooled-thrift-client.git"
+    "url": "git+https://github.com/brigade/pooled-thrift-client.git"
   },
   "keywords": [
     "thrift",
@@ -20,9 +20,9 @@
   "author": "Anuj Das",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/anujdas/pooled-thrift-client/issues"
+    "url": "https://github.com/brigade/pooled-thrift-client/issues"
   },
-  "homepage": "https://github.com/anujdas/pooled-thrift-client#readme",
+  "homepage": "https://github.com/brigade/pooled-thrift-client#readme",
   "dependencies": {
     "generic-pool": "^3.4.0",
     "thrift": "^0.11.0"
