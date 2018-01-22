@@ -5,6 +5,17 @@
 
 A node Thrift client utilising a pool of service connections and improved error handling/recovery
 
+## Features
+
+- proper Promise support in pool instance con/destruction
+- correct behaviour on "Internal Error", aka, socket misalignment on
+  unhandled server errors
+- better/existent timeout support for: connections, pool checkout,
+  execution
+- builtin retry support using upstream Thrift code
+- faster detection and pruning of dead connections
+- async/await and other niceties
+
 ## Example usage
 
 Given a thrift file `calculator_service.thrift` with contents:
