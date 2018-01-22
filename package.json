@@ -6,7 +6,8 @@
   "scripts": {
     "build": "babel src -d dist",
     "lint": "eslint .",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.13.1",
-    "eslint-config-brigade": "^7.0.0"
+    "eslint-config-brigade": "^7.0.0",
+    "jasmine": "^2.9.0"
   }
 }
