@@ -1,5 +1,8 @@
 # pooled-thrift-client
 
+[![npm version](https://badge.fury.io/js/%40brigade%2Fpooled-thrift-client.svg)](https://badge.fury.io/js/%40brigade%2Fpooled-thrift-client)
+[![Build Status](https://travis-ci.org/brigade/pooled-thrift-client.svg?branch=master)](https://travis-ci.org/brigade/pooled-thrift-client)
+
 A node Thrift client utilising a pool of service connections and improved error handling/recovery
 
 ## Example usage
