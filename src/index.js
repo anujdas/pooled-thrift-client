@@ -72,14 +72,17 @@ const pooledRpc = (TService, rpc, pool) => (...args) => {
     .then(connection => new Promise((resolve, reject) => {
       const onTimeout = () => {
         connection.alive = false;
+        pool.release(connection);
         reject(new ConnectionTimeoutError());
       };
       const onClose = () => {
         connection.alive = false;
+        pool.release(connection);
         reject(new ConnectionClosedError());
       };
       const onError = (error) => {
         connection.alive = false;
+        pool.release(connection);
         reject(error);
       };
       connection.on('timeout', onTimeout).on('close', onClose).on('error', onError);
