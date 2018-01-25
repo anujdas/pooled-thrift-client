@@ -1,6 +1,10 @@
-import GenericPool from 'generic-pool';
-import Thrift, { TBinaryProtocol, TFramedTransport } from 'thrift';
-import { AcquisitionTimeoutError, ConnectionTimeoutError, ConnectionClosedError } from './errors';
+const GenericPool = require('generic-pool');
+const Thrift = require('thrift');
+const {
+  AcquisitionTimeoutError,
+  ConnectionTimeoutError,
+  ConnectionClosedError,
+} = require('./errors');
 
 /* Callback handlers */
 
@@ -29,7 +33,6 @@ const attachCallbacks = (connection, reject) => {
 
   return { onTimeout, onClose, onError };
 };
-
 
 /**
  * Removes callbacks attached to a connection by attachCallbacks
@@ -117,8 +120,8 @@ const DEFAULT_POOL_OPTIONS = {
 };
 
 const DEFAULT_THRIFT_OPTIONS = {
-  transport: TFramedTransport,
-  protocol: TBinaryProtocol,
+  transport: Thrift.TFramedTransport,
+  protocol: Thrift.TBinaryProtocol,
   connect_timeout: 1000,
   max_attempts: 3,
 };
@@ -143,7 +146,7 @@ const DEFAULT_THRIFT_OPTIONS = {
  *
  * @return {Object} A client with methods corresponding to the TService
  */
-export default function(TService, poolOptions, thriftOptions) {
+module.exports = (TService, poolOptions, thriftOptions) => {
   if (!thriftOptions.host || !thriftOptions.port) {
     throw new Error('PooledThriftClient: both host and port must be specified');
   }
@@ -153,13 +156,14 @@ export default function(TService, poolOptions, thriftOptions) {
 
   const pool = GenericPool.createPool({
     create: () => createThriftConnection(thriftOptions),
-    validate: async connection => connection.alive && connection.connected,
-    destroy: async connection => connection.end(),
+    destroy: connection => new Promise(resolve => resolve(connection.end())),
+    validate: connection => new Promise((resolve) => {
+      resolve(connection.alive && connection.connected);
+    }),
   }, poolOptions);
 
   return Object.keys(TService.Client.prototype).reduce((thriftClient, rpc) => {
     thriftClient[rpc] = pooledRpc(TService, rpc, pool);
     return thriftClient;
   }, {});
-}
-export { AcquisitionTimeoutError, ConnectionTimeoutError, ConnectionClosedError };
+};
