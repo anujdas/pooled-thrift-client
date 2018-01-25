@@ -1,4 +1,4 @@
-import thriftClient from '../src';
+const thriftClient = require('../src');
 
 describe('pooledThriftClient', () => {
   beforeEach(() => {
