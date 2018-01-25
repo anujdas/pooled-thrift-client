@@ -1,30 +1,47 @@
 import GenericPool from 'generic-pool';
 import Thrift, { TBinaryProtocol, TFramedTransport } from 'thrift';
+import { AcquisitionTimeoutError, ConnectionTimeoutError, ConnectionClosedError } from './errors';
 
-/* Error types */
+/* Callback handlers */
 
-export const AcquisitionTimeoutError = class extends Error {
-  constructor(message, metadata = {}) {
-    super(`Thrift pool connection acquisition timeout: ${message}`, metadata);
-    this.name = 'AcquisitionTimeoutError';
-    Error.captureStackTrace(this, AcquisitionTimeoutError);
-  }
+/**
+ * Wraps a connection in event callbacks suitable for Promise use
+ *
+ * @param {Connection} connection A Thrift connection
+ * @param {function} reject A Promise's reject function
+ *
+ * @return {Object} Three callbacks: onTimeout, onClose, onError
+ */
+const attachCallbacks = (connection, reject) => {
+  const onTimeout = () => {
+    connection.alive = false;
+    reject(new ConnectionTimeoutError());
+  };
+  const onClose = () => {
+    connection.alive = false;
+    reject(new ConnectionClosedError());
+  };
+  const onError = (error) => {
+    connection.alive = false;
+    reject(error);
+  };
+  connection.on('timeout', onTimeout).on('close', onClose).on('error', onError);
+
+  return { onTimeout, onClose, onError };
 };
 
-export const ConnectionTimeoutError = class extends Error {
-  constructor() {
-    super('Thrift connection timeout');
-    this.name = 'ConnectionTimeoutError';
-    Error.captureStackTrace(this, ConnectionTimeoutError);
-  }
-};
 
-export const ConnectionClosedError = class extends Error {
-  constructor() {
-    super('Thrift connection closed');
-    this.name = 'ConnectionClosedError';
-    Error.captureStackTrace(this, ConnectionClosedError);
-  }
+/**
+ * Removes callbacks attached to a connection by attachCallbacks
+ *
+ * @param {Connection} connection A Thrift connection
+ * @param {Object} callbacks The returned { onTimeout, onClose, onError } from attachCallbacks
+ */
+const detachCallbacks = (connection, { onTimeout, onClose, onError }) => {
+  connection
+    .removeListener('timeout', onTimeout)
+    .removeListener('close', onClose)
+    .removeListener('error', onError);
 };
 
 /* Constructors */
@@ -39,20 +56,21 @@ export const ConnectionClosedError = class extends Error {
  * @return {Promise} Resolves to an open connection or an error
  */
 const createThriftConnection = (thriftOptions) => {
+  let connection, callbacks;
   return new Promise((resolve, reject) => {
     const { host, port } = thriftOptions;
-    const connection = Thrift.createConnection(host, port, thriftOptions);
+    connection = Thrift.createConnection(host, port, thriftOptions);
     connection.alive = false; // add a property for validation purposes
-
-    connection
-      .on('connect', () => {
-        connection.connection.setKeepAlive(true); // socket manipulation
-        connection.alive = true;
-        resolve(connection);
-      })
-      .on('timeout', () => reject(new ConnectionTimeoutError()))
-      .on('close', () => reject(new ConnectionClosedError()))
-      .on('error', reject);
+    callbacks = attachCallbacks(connection, reject);
+    connection.on('connect', resolve);
+  }).then(() => {
+    detachCallbacks(connection, callbacks);
+    connection.connection.setKeepAlive(true); // socket manipulation
+    connection.alive = true; // state tracking
+    return connection;
+  }).catch((error) => {
+    detachCallbacks(connection, callbacks);
+    throw error;
   });
 };
 
@@ -69,33 +87,22 @@ const createThriftConnection = (thriftOptions) => {
 const pooledRpc = (TService, rpc, pool) => (...args) => {
   return pool.acquire()
     .catch(e => Promise.reject(new AcquisitionTimeoutError(e.message)))
-    .then(connection => new Promise((resolve, reject) => {
-      const onTimeout = () => {
-        connection.alive = false;
+    .then((connection) => {
+      let callbacks;
+      return new Promise((resolve, reject) => {
+        callbacks = attachCallbacks(connection, reject);
+        const client = Thrift.createClient(TService, connection);
+        resolve(client[rpc](...args));
+      }).then((response) => {
+        detachCallbacks(connection, callbacks);
         pool.release(connection);
-        reject(new ConnectionTimeoutError());
-      };
-      const onClose = () => {
-        connection.alive = false;
+        return response;
+      }).catch((error) => {
+        detachCallbacks(connection, callbacks);
         pool.release(connection);
-        reject(new ConnectionClosedError());
-      };
-      const onError = (error) => {
-        connection.alive = false;
-        pool.release(connection);
-        reject(error);
-      };
-      connection.on('timeout', onTimeout).on('close', onClose).on('error', onError);
-
-      const client = Thrift.createClient(TService, connection);
-      const response = client[rpc](...args).finally(() => {
-        connection.removeListener('timeout', onTimeout);
-        connection.removeListener('close', onClose);
-        connection.removeListener('error', onError);
-        pool.release(connection);
+        throw error;
       });
-      resolve(response);
-    }));
+    });
 };
 
 /* Default options */
@@ -155,3 +162,4 @@ export default function(TService, poolOptions, thriftOptions) {
     return thriftClient;
   }, {});
 }
+export { AcquisitionTimeoutError, ConnectionTimeoutError, ConnectionClosedError };
