@@ -1,6 +1,6 @@
 {
   "name": "@brigade/pooled-thrift-client",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A Thrift client utilising a pool of service connections and improved error handling/recovery",
   "main": "src/index.js",
   "engines": {
