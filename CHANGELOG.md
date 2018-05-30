@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Make client object more meaningful by wrapping only actual RPC methods
+
 ## 1.0.0
 
 - Initial release
