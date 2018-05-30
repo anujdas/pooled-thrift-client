@@ -162,7 +162,10 @@ module.exports = (TService, poolOptions, thriftOptions) => {
     }),
   }, poolOptions);
 
-  return Object.keys(TService.Client.prototype).reduce((thriftClient, rpc) => {
+  const clientClass = TService.Client.prototype;
+  return Object.keys(clientClass).filter((k) => {
+    return clientClass.hasOwnProperty(`send_${k}`) && clientClass.hasOwnProperty(`recv_${k}`);
+  }).reduce((thriftClient, rpc) => {
     thriftClient[rpc] = pooledRpc(TService, rpc, pool);
     return thriftClient;
   }, {});
