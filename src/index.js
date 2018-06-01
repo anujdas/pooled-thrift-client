@@ -54,7 +54,7 @@ const detachCallbacks = (connection, { onTimeout, onClose, onError }) => {
  *
  * @param {Object} thriftOptions Options passed directly to Thrift's createConnection()
  * @param {String} thriftOptions.host The hostname of the target service
- * @param {Integer} thriftOptions.port The port number of the target service
+ * @param {Number} thriftOptions.port The port number of the target service
  *
  * @return {Promise} Resolves to an open connection or an error
  */
@@ -129,30 +129,43 @@ const DEFAULT_THRIFT_OPTIONS = {
 /* Entrypoint */
 
 /**
+ * @callback ThriftClient
+ *
+ * @param {ThriftService} TService The generated Service class to connect to
+ * @param {Object} thriftOptions Options to provide to `Thrift.createConnection`
+ * @param {String} thriftOptions.host The hostname of the target service
+ * @param {Number} thriftOptions.port The port number of the target service
+ * @param {Object} [clientOptions={}] Options for this particular client to use
+ *
+ * @return {Object.<String, Function>} A client with methods corresponding to the TService
+ */
+
+/**
  * Returns a Thrift client utilising a pool of service connections and good error recovery
  *
  * @param {ThriftService} TService The generated Service class to connect to
- * @param {Object} poolOptions Options passed directly to GenericPool's constructor; see
- *   https://github.com/coopernurse/node-pool/blob/71fc5582712dc5982d2b3987b84f9fbc93fe8501/lib/PoolOptions.js#L6-L47
  * @param {Object} thriftOptions Options passed directly to Thrift's createConnection(); see
  *   https://github.com/apache/thrift/blob/0a84eae1db28abb5e3ee730e8fa40a154c6e1097/lib/nodejs/lib/thrift/connection.js#L35
  * @param {String} thriftOptions.host The hostname of the target service
- * @param {Integer} thriftOptions.port The port number of the target service
+ * @param {Number} thriftOptions.port The port number of the target service
  * @param {ThriftTransport} [thriftOptions.transport=TFramedTransport] Transport of target service
  * @param {ThriftProtocol} [thriftOptions.protocol=TBinaryProtocol] Protocol of target service
- * @param {Integer} [thriftOptions.connect_timeout=1000] Milliseconds to wait for connection
-   * @param {Integer} [thriftOptions.timeout=null] Milliseconds to wait for each RPC, if set
- * @param {Integer} [thriftOptions.max_attempts=3] Number of times to attempt reconnection
+ * @param {Number} [thriftOptions.connect_timeout=1000] Milliseconds to wait for connection
+ * @param {Number} [thriftOptions.timeout=null] Milliseconds to wait for each RPC, if set
+ * @param {Number} [thriftOptions.max_attempts=3] Number of times to attempt reconnection
+ * @param {Object} clientOptions Options for the pooled client
+ * @param {Object} clientOptions.poolOptions Options passed directly to GenericPool's constructor; see
+ *   https://github.com/coopernurse/node-pool/blob/71fc5582712dc5982d2b3987b84f9fbc93fe8501/lib/PoolOptions.js#L6-L47
  *
  * @return {Object} A client with methods corresponding to the TService
  */
-module.exports = (TService, poolOptions, thriftOptions) => {
+module.exports = (TService, thriftOptions, clientOptions) => {
   if (!thriftOptions.host || !thriftOptions.port) {
     throw new Error('PooledThriftClient: both host and port must be specified');
   }
 
   thriftOptions = Object.assign({}, DEFAULT_THRIFT_OPTIONS, thriftOptions);
-  poolOptions = Object.assign({}, DEFAULT_POOL_OPTIONS, poolOptions);
+  const poolOptions = Object.assign({}, DEFAULT_POOL_OPTIONS, clientOptions.poolOptions);
 
   const pool = GenericPool.createPool({
     create: () => createThriftConnection(thriftOptions),

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0
+
+- Really just a constructor change to make things more sensible, but in line
+  with semver, we're now at 2.0.0.
+
 ## 1.1.1
 
 - Make client object more meaningful by wrapping only actual RPC methods

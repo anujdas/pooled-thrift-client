@@ -40,7 +40,7 @@ const thriftClient = require('pooled-thrift-client');
 
 // host and port are mandatory see other config options in comments
 const host = '127.0.0.1', port = 9000;
-const client = thriftClient(CalculatorService, { max: 5 }, { host, port });
+const client = thriftClient(CalculatorService, { host, port }, { poolOptions: { max: 5 } });
 
 // use the client as you would a regular client, get pooling for free
 client.add(1, 2).then(sum => console.log(sum));
