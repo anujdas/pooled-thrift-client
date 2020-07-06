@@ -15,6 +15,8 @@ A node Thrift client utilising a pool of service connections and improved error 
 - builtin retry support using upstream Thrift code
 - faster detection and pruning of dead connections
 - async/await compatibility and other niceties
+- enabled oneway function
+- enable trace log with debug mod
 
 ## Example usage
 

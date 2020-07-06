@@ -26,8 +26,9 @@
   },
   "homepage": "https://github.com/brigade/pooled-thrift-client#readme",
   "dependencies": {
-    "generic-pool": "^3.4.0",
-    "thrift": "^0.11.0"
+    "debug": "^4.1.1",
+    "generic-pool": "^3.7.1",
+    "thrift": "^0.12.0"
   },
   "devDependencies": {
     "eslint": "^4.13.1",
